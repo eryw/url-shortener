@@ -1,0 +1,72 @@
+{{define "title"}}Dashboard - URL Shortener{{end}}
+
+{{define "content"}}
+<div class="min-h-screen bg-gray-50">
+    <nav class="bg-white shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <h1 class="text-xl font-bold text-gray-900">URL Shortener</h1>
+                </div>
+                <div class="flex items-center">
+                    <a href="/logout" class="text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium">
+                        Logout
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+        <div class="px-4 py-6 sm:px-0">
+            <div class="mb-6 flex justify-between items-center">
+                <h2 class="text-2xl font-bold text-gray-900">URL Management</h2>
+                <button hx-get="/admin/urls/new" hx-target="#modal-container" 
+                        class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                    Add New URL
+                </button>
+            </div>
+
+            <div class="bg-white shadow rounded-lg">
+                <div class="p-6 border-b border-gray-200">
+                    <form hx-get="/admin/urls" hx-target="#url-table-container" hx-trigger="submit, change from:select">
+                        <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                            <div class="sm:col-span-2">
+                                <input type="text" name="q" value="{{.Query}}" placeholder="Search URLs..." 
+                                       class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md px-3 py-2 border">
+                            </div>
+                            <div>
+                                <select name="filter" class="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md border">
+                                    <option value="any" {{if eq .Filter "any"}}selected{{end}}>Anything</option>
+                                    <option value="original_url" {{if eq .Filter "original_url"}}selected{{end}}>Original URL</option>
+                                    <option value="notes" {{if eq .Filter "notes"}}selected{{end}}>Notes</option>
+                                </select>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <div id="url-table-container">
+                    {{template "url_table.html" .}}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-container"></div>
+</div>
+
+<script>
+document.body.addEventListener('htmx:afterSwap', function(event) {
+    if (event.detail.target.id === 'modal-container') {
+        if (event.detail.target.innerHTML.trim() === '') {
+            return;
+        }
+    }
+});
+
+document.body.addEventListener('closeModal', function() {
+    document.getElementById('modal-container').innerHTML = '';
+});
+</script>
+{{end}}

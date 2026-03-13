@@ -1,0 +1,16 @@
+[Unit]
+Description=URL Shortener Service
+After=network.target
+
+[Service]
+Type=simple
+User=www-data
+Group=www-data
+WorkingDirectory=/opt/url-shortener
+EnvironmentFile=/opt/url-shortener/.env
+ExecStart=/opt/url-shortener/url-shortener
+Restart=on-failure
+RestartSec=5s
+
+[Install]
+WantedBy=multi-user.target

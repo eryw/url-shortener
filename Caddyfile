@@ -1,0 +1,9 @@
+go.yourdomain.com {
+    reverse_proxy localhost:8080
+    
+    encode gzip
+    
+    log {
+        output file /var/log/caddy/url-shortener.log
+    }
+}
