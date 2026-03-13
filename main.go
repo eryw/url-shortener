@@ -72,10 +72,10 @@ func main() {
 			return
 		}
 
-		if strings.HasPrefix(r.URL.Path, "/admin/") || 
-		   strings.HasPrefix(r.URL.Path, "/login") || 
-		   strings.HasPrefix(r.URL.Path, "/logout") || 
-		   strings.HasPrefix(r.URL.Path, "/setup") {
+		if strings.HasPrefix(r.URL.Path, "/admin/") ||
+			strings.HasPrefix(r.URL.Path, "/login") ||
+			strings.HasPrefix(r.URL.Path, "/logout") ||
+			strings.HasPrefix(r.URL.Path, "/setup") {
 			http.NotFound(w, r)
 			return
 		}

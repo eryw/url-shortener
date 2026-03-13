@@ -76,7 +76,7 @@ func (a *Admin) CheckPassword(password string) bool {
 	return err == nil
 }
 
-const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+const charset = "abcdefghijklmnopqrstuvwxyz0123456789"
 
 func generateRandomCode(length int) (string, error) {
 	result := make([]byte, length)

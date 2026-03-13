@@ -1,6 +1,14 @@
-{{define "title"}}Dashboard - URL Shortener{{end}}
-
-{{define "content"}}
+{{define "dashboard.html"}}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - URL Shortener</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+</head>
+<body class="bg-gray-50">
 <div class="min-h-screen bg-gray-50">
     <nav class="bg-white shadow-sm">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -29,8 +37,8 @@
 
             <div class="bg-white shadow rounded-lg">
                 <div class="p-6 border-b border-gray-200">
-                    <form hx-get="/admin/urls" hx-target="#url-table-container" hx-trigger="submit, change from:select">
-                        <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                    <form hx-get="/admin/urls" hx-target="#url-table-container">
+                        <div class="grid grid-cols-1 gap-4 sm:grid-cols-4">
                             <div class="sm:col-span-2">
                                 <input type="text" name="q" value="{{.Query}}" placeholder="Search URLs..." 
                                        class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md px-3 py-2 border">
@@ -41,6 +49,12 @@
                                     <option value="original_url" {{if eq .Filter "original_url"}}selected{{end}}>Original URL</option>
                                     <option value="notes" {{if eq .Filter "notes"}}selected{{end}}>Notes</option>
                                 </select>
+                            </div>
+                            <div>
+                                <button type="submit" 
+                                        class="w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                    Search
+                                </button>
                             </div>
                         </div>
                     </form>
@@ -69,4 +83,6 @@ document.body.addEventListener('closeModal', function() {
     document.getElementById('modal-container').innerHTML = '';
 });
 </script>
+</body>
+</html>
 {{end}}

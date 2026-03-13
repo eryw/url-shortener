@@ -1,6 +1,14 @@
-{{define "title"}}Setup - URL Shortener{{end}}
-
-{{define "content"}}
+{{define "setup.html"}}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Setup - URL Shortener</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+</head>
+<body class="bg-gray-50">
 <div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
     <div class="max-w-md w-full space-y-8">
         <div>
@@ -11,7 +19,7 @@
                 Set up your administrator credentials
             </p>
         </div>
-        <form class="mt-8 space-y-6" method="POST">
+        <form class="mt-8 space-y-6" method="POST" action="/setup/create">
             {{if .Error}}
             <div class="rounded-md bg-red-50 p-4">
                 <div class="text-sm text-red-700">{{.Error}}</div>
@@ -41,4 +49,6 @@
         </form>
     </div>
 </div>
+</body>
+</html>
 {{end}}
