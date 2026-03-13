@@ -137,7 +137,7 @@ sudo systemctl reload caddy
    - Click "Add New URL" button
    - Enter the original URL
    - Optionally add notes
-   - Short code is auto-generated (4+ alphanumeric characters)
+   - Short code is auto-generated (4+ lowercase alphanumeric characters)
 
 2. **Edit URL**:
    - Click "Edit" on any URL row
@@ -149,9 +149,9 @@ sudo systemctl reload caddy
    - Confirm the deletion
 
 4. **Search URLs**:
-   - Use the search box to filter URLs
+   - Use the search box and click "Search" button to filter URLs
    - Filter by: Anything, Original URL, or Notes
-   - Results are paginated (50 per page)
+   - Results are paginated (50 per page) and search the entire database
 
 ### Short URL Format
 
@@ -160,7 +160,7 @@ Short URLs follow this pattern:
 https://go.yourdomain.com/{code}
 ```
 
-Where `{code}` is a unique alphanumeric string (4+ characters).
+Where `{code}` is a unique lowercase alphanumeric string (4+ characters).
 
 ### Redirects
 
@@ -245,4 +245,4 @@ go build -o url-shortener
 
 ## License
 
-MIT License
+Apache License 2.0

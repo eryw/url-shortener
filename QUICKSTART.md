@@ -35,12 +35,14 @@ curl -I http://localhost:8080/abc123
 
 You should see a `301 Moved Permanently` redirect to your original URL.
 
+**Note**: Short codes are now generated in lowercase only (e.g., `abc123`, `xyz789`).
+
 ## Features to Try
 
 ### Search & Filter
-- Use the search box to find URLs
-- Filter by: "Anything", "Original URL", or "Notes"
-- Results update instantly with HTMX
+- Use the search box and click "Search" button to find URLs
+- Filter by: "Anything", "Original URL", or "Notes"  
+- Results are paginated (50 per page) and search the entire database
 
 ### Edit Notes
 - Click "Edit" on any URL
