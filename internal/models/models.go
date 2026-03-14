@@ -5,8 +5,11 @@ import (
 	"database/sql"
 	"errors"
 	"math/big"
+	"net"
+	"net/http"
 	"time"
 
+	"github.com/gorilla/sessions"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -25,6 +28,14 @@ type URL struct {
 	VisitCount  int
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
+}
+
+type Visit struct {
+	ID        int
+	URLID     int
+	UserAgent string
+	IPAddress string
+	VisitedAt time.Time
 }
 
 func AdminExists(db *sql.DB) (bool, error) {
@@ -205,4 +216,55 @@ func SearchURLs(db *sql.DB, query, filter string, page, perPage int) ([]URL, int
 func IncrementVisitCount(db *sql.DB, code string) error {
 	_, err := db.Exec("UPDATE urls SET visit_count = visit_count + 1 WHERE code = ?", code)
 	return err
+}
+
+func RecordVisit(db *sql.DB, urlID int, userAgent, ipAddress string) (bool, error) {
+	result, err := db.Exec("INSERT INTO visits (url_id, user_agent, ip_address) VALUES (?, ?, ?)", urlID, userAgent, ipAddress)
+	if err != nil {
+		// Check if it's a unique constraint violation (SQLite returns this as "UNIQUE constraint failed")
+		if err.Error() == "UNIQUE constraint failed" ||
+			(len(err.Error()) > 25 && err.Error()[:25] == "UNIQUE constraint failed") {
+			return false, nil // Visit not recorded due to duplicate IP
+		}
+		return false, err
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return false, err
+	}
+
+	return rowsAffected > 0, nil
+}
+
+func IsUserAuthenticated(r *http.Request, store sessions.Store) bool {
+	session, _ := store.Get(r, "session")
+	auth, ok := session.Values["authenticated"].(bool)
+	return ok && auth
+}
+
+func GetRealIP(r *http.Request) string {
+	// Check for X-Forwarded-For header first (for proxies/load balancers)
+	if xff := r.Header.Get("X-Forwarded-For"); xff != "" {
+		// Take the first IP from the list
+		for i, char := range xff {
+			if char == ',' {
+				return xff[:i]
+			}
+		}
+		return xff
+	}
+
+	// Check for X-Real-IP header
+	if xri := r.Header.Get("X-Real-IP"); xri != "" {
+		return xri
+	}
+
+	// Fall back to RemoteAddr and extract IP
+	ip, _, err := net.SplitHostPort(r.RemoteAddr)
+	if err != nil {
+		// If there's no port, return as-is
+		return r.RemoteAddr
+	}
+	return ip
 }

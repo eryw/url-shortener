@@ -44,7 +44,7 @@ func main() {
 	authHandler := handlers.NewAuthHandler(db, store, tmpl)
 	dashboardHandler := handlers.NewDashboardHandler(db, store, tmpl)
 	urlHandler := handlers.NewURLHandler(db, store, tmpl, cfg.BaseURL)
-	redirectHandler := handlers.NewRedirectHandler(db)
+	redirectHandler := handlers.NewRedirectHandler(db, store)
 
 	mux := http.NewServeMux()
 
