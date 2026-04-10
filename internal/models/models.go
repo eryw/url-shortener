@@ -63,13 +63,23 @@ func ResetAdmin(db *sql.DB, username, password string) error {
 		return err
 	}
 
-	_, err = db.Exec("DELETE FROM admin")
+	tx, err := db.Begin()
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+
+	_, err = tx.Exec("DELETE FROM admin")
 	if err != nil {
 		return err
 	}
 
-	_, err = db.Exec("INSERT INTO admin (username, password_hash) VALUES (?, ?)", username, string(hash))
-	return err
+	_, err = tx.Exec("INSERT INTO admin (username, password_hash) VALUES (?, ?)", username, string(hash))
+	if err != nil {
+		return err
+	}
+
+	return tx.Commit()
 }
 
 func GetAdmin(db *sql.DB, username string) (*Admin, error) {
@@ -160,8 +170,18 @@ func UpdateURLNotes(db *sql.DB, id int, notes string) error {
 }
 
 func DeleteURL(db *sql.DB, id int) error {
-	_, err := db.Exec("DELETE FROM urls WHERE id = ?", id)
-	return err
+	result, err := db.Exec("DELETE FROM urls WHERE id = ?", id)
+	if err != nil {
+		return err
+	}
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if rowsAffected == 0 {
+		return sql.ErrNoRows
+	}
+	return nil
 }
 
 func SearchURLs(db *sql.DB, query, filter string, page, perPage int) ([]URL, int, error) {

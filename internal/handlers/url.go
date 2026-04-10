@@ -56,10 +56,21 @@ func (h *URLHandler) CreateURL(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if _, err := url.ParseRequestURI(originalURL); err != nil {
+	parsedURL, err := url.ParseRequestURI(originalURL)
+	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		data := map[string]interface{}{
 			"Error": "Invalid URL format",
+		}
+		h.templates.ExecuteTemplate(w, "modal_add.html", data)
+		return
+	}
+
+	// Only allow http and https schemes
+	if parsedURL.Scheme != "http" && parsedURL.Scheme != "https" {
+		w.WriteHeader(http.StatusBadRequest)
+		data := map[string]interface{}{
+			"Error": "URL must use http or https scheme",
 		}
 		h.templates.ExecuteTemplate(w, "modal_add.html", data)
 		return
@@ -128,6 +139,10 @@ func (h *URLHandler) UpdateURL(w http.ResponseWriter, r *http.Request) {
 	notes := r.FormValue("notes")
 
 	if err := models.UpdateURLNotes(h.db, id, notes); err != nil {
+		if err == sql.ErrNoRows {
+			http.Error(w, "URL not found", http.StatusNotFound)
+			return
+		}
 		urlObj, _ := models.GetURLByID(h.db, id)
 		w.WriteHeader(http.StatusInternalServerError)
 		data := map[string]interface{}{

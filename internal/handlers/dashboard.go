@@ -86,6 +86,10 @@ func (h *DashboardHandler) DeleteURL(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := models.DeleteURL(h.db, id); err != nil {
+		if err == sql.ErrNoRows {
+			http.Error(w, "URL not found", http.StatusNotFound)
+			return
+		}
 		http.Error(w, "Failed to delete URL", http.StatusInternalServerError)
 		return
 	}

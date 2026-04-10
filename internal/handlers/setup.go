@@ -38,7 +38,8 @@ func (h *SetupHandler) ShowSetup(w http.ResponseWriter, r *http.Request) {
 	}
 
 	data := map[string]interface{}{
-		"Error": "",
+		"Error":     "",
+		"ResetMode": false,
 	}
 
 	if err := h.templates.ExecuteTemplate(w, "setup.html", data); err != nil {
@@ -92,7 +93,8 @@ func (h *SetupHandler) ShowReset(w http.ResponseWriter, r *http.Request) {
 	}
 
 	data := map[string]interface{}{
-		"Error": "",
+		"Error":     "",
+		"ResetMode": true,
 	}
 
 	if err := h.templates.ExecuteTemplate(w, "setup.html", data); err != nil {
@@ -111,12 +113,21 @@ func (h *SetupHandler) ResetAdmin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Check if user is already authenticated
+	session, _ := h.store.Get(r, "session")
+	auth, ok := session.Values["authenticated"].(bool)
+	if !ok || !auth {
+		http.Error(w, "Authentication required to reset admin", http.StatusUnauthorized)
+		return
+	}
+
 	username := r.FormValue("username")
 	password := r.FormValue("password")
 
 	if username == "" || password == "" {
 		data := map[string]interface{}{
-			"Error": "Username and password are required",
+			"Error":     "Username and password are required",
+			"ResetMode": true,
 		}
 		h.templates.ExecuteTemplate(w, "setup.html", data)
 		return
@@ -124,11 +135,17 @@ func (h *SetupHandler) ResetAdmin(w http.ResponseWriter, r *http.Request) {
 
 	if err := models.ResetAdmin(h.db, username, password); err != nil {
 		data := map[string]interface{}{
-			"Error": "Failed to reset admin account",
+			"Error":     "Failed to reset admin account",
+			"ResetMode": true,
 		}
 		h.templates.ExecuteTemplate(w, "setup.html", data)
 		return
 	}
+
+	// Invalidate all sessions after reset
+	session.Values["authenticated"] = false
+	delete(session.Values, "username")
+	session.Save(r, w)
 
 	http.Redirect(w, r, "/login", http.StatusSeeOther)
 }
