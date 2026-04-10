@@ -3,7 +3,6 @@ package config
 import (
 	"log"
 	"os"
-	"strconv"
 
 	"github.com/joho/godotenv"
 )
@@ -13,17 +12,11 @@ type Config struct {
 	Port          string
 	DBPath        string
 	SessionSecret string
-	ResetAdmin    bool
 }
 
 func Load() *Config {
 	if err := godotenv.Load(); err != nil {
 		log.Println("No .env file found, using environment variables")
-	}
-
-	resetAdmin := false
-	if val := os.Getenv("RESET_ADMIN"); val != "" {
-		resetAdmin, _ = strconv.ParseBool(val)
 	}
 
 	port := os.Getenv("PORT")
@@ -51,6 +44,5 @@ func Load() *Config {
 		Port:          port,
 		DBPath:        dbPath,
 		SessionSecret: sessionSecret,
-		ResetAdmin:    resetAdmin,
 	}
 }

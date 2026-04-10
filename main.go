@@ -58,7 +58,6 @@ func handleInit() error {
 PORT=8080
 DB_PATH=./data/urls.db
 SESSION_SECRET=%s
-RESET_ADMIN=false
 `, secret)
 
 	if err := os.WriteFile(envPath, []byte(envContent), 0600); err != nil {
@@ -71,6 +70,7 @@ RESET_ADMIN=false
 
 func main() {
 	initFlag := flag.Bool("init", false, "Generate .env file with default values and exit")
+	resetPwFlag := flag.Bool("reset-admin", false, "Enable admin password reset via web interface")
 	flag.Parse()
 
 	if *initFlag {
@@ -111,7 +111,7 @@ func main() {
 
 	authMiddleware := middleware.NewAuthMiddleware(store, db)
 
-	setupHandler := handlers.NewSetupHandler(db, store, tmpl, cfg.ResetAdmin)
+	setupHandler := handlers.NewSetupHandler(db, store, tmpl, *resetPwFlag)
 	authHandler := handlers.NewAuthHandler(db, store, tmpl)
 	dashboardHandler := handlers.NewDashboardHandler(db, store, tmpl)
 	urlHandler := handlers.NewURLHandler(db, store, tmpl, cfg.BaseURL)
