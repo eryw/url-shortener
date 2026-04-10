@@ -2,24 +2,29 @@
 
 ## Run Locally (Development)
 
-1. **Start the server**:
+1. **Initialize environment** (first time only):
+```bash
+./url-shortener --init
+```
+
+2. **Start the server**:
 ```bash
 ./url-shortener
 ```
 
-2. **Open your browser**:
+3. **Open your browser**:
    - Go to: `http://localhost:8080`
 
-3. **First-time setup**:
+4. **First-time setup**:
    - You'll be redirected to `/setup`
    - Create your admin username and password
    - Click "Create Account"
 
-4. **Login**:
+5. **Login**:
    - Enter your credentials
    - Click "Sign in"
 
-5. **Start creating short URLs**:
+6. **Start creating short URLs**:
    - Click "Add New URL" button
    - Enter the original URL (e.g., `https://example.com/very/long/url`)
    - Optionally add notes

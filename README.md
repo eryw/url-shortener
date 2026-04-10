@@ -35,19 +35,24 @@ go mod download
 go build -o url-shortener
 ```
 
-2. **Configure environment**:
+2. **Initialize environment**:
 ```bash
-cp .env.example .env
-# Edit .env with your settings
+./url-shortener --init
+```
+This generates a `.env` file with a secure random `SESSION_SECRET`. If `.env` already exists, you'll be prompted to confirm overwrite.
+
+3. **Edit configuration** (optional):
+```bash
 nano .env
 ```
+Update `BASE_URL` to your domain if needed.
 
-3. **Run the application**:
+4. **Run the application**:
 ```bash
 ./url-shortener
 ```
 
-4. **First-run setup**:
+5. **First-run setup**:
    - Visit `http://localhost:8080/setup`
    - Create your admin account
    - Login at `http://localhost:8080/login`

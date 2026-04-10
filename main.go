@@ -1,9 +1,17 @@
 package main
 
 import (
+	"bufio"
+	"crypto/rand"
+	"embed"
+	"encoding/base64"
+	"flag"
+	"fmt"
 	"html/template"
+	"io/fs"
 	"log"
 	"net/http"
+	"os"
 	"strings"
 	"url-shortener/internal/config"
 	"url-shortener/internal/database"
@@ -13,7 +21,64 @@ import (
 	"github.com/gorilla/sessions"
 )
 
+//go:embed templates/*
+var templatesFS embed.FS
+
+func generateSecureSecret() (string, error) {
+	bytes := make([]byte, 32)
+	if _, err := rand.Read(bytes); err != nil {
+		return "", err
+	}
+	return base64.URLEncoding.EncodeToString(bytes), nil
+}
+
+func handleInit() error {
+	envPath := ".env"
+
+	if _, err := os.Stat(envPath); err == nil {
+		fmt.Print(".env file already exists. Overwrite? (y/N): ")
+		reader := bufio.NewReader(os.Stdin)
+		response, err := reader.ReadString('\n')
+		if err != nil {
+			return fmt.Errorf("failed to read response: %w", err)
+		}
+		response = strings.TrimSpace(strings.ToLower(response))
+		if response != "y" && response != "yes" {
+			fmt.Println("Init cancelled.")
+			return nil
+		}
+	}
+
+	secret, err := generateSecureSecret()
+	if err != nil {
+		return fmt.Errorf("failed to generate secure secret: %w", err)
+	}
+
+	envContent := fmt.Sprintf(`BASE_URL=http://localhost:8080
+PORT=8080
+DB_PATH=./data/urls.db
+SESSION_SECRET=%s
+RESET_ADMIN=false
+`, secret)
+
+	if err := os.WriteFile(envPath, []byte(envContent), 0600); err != nil {
+		return fmt.Errorf("failed to write .env file: %w", err)
+	}
+
+	fmt.Printf("Created .env file with secure SESSION_SECRET.\n")
+	return nil
+}
+
 func main() {
+	initFlag := flag.Bool("init", false, "Generate .env file with default values and exit")
+	flag.Parse()
+
+	if *initFlag {
+		if err := handleInit(); err != nil {
+			log.Fatalf("Init failed: %v", err)
+		}
+		return
+	}
 	cfg := config.Load()
 
 	db, err := database.Init(cfg.DBPath)
@@ -35,8 +100,14 @@ func main() {
 		"sub": func(a, b int) int { return a - b },
 	}
 
-	tmpl := template.Must(template.New("").Funcs(funcMap).ParseGlob("templates/*.html"))
-	tmpl = template.Must(tmpl.ParseGlob("templates/partials/*.html"))
+	// Parse templates from embedded filesystem
+	templatesSubFS, err := fs.Sub(templatesFS, "templates")
+	if err != nil {
+		log.Fatalf("Failed to create sub filesystem: %v", err)
+	}
+
+	tmpl := template.Must(template.New("").Funcs(funcMap).ParseFS(templatesSubFS, "*.html"))
+	tmpl = template.Must(tmpl.ParseFS(templatesSubFS, "partials/*.html"))
 
 	authMiddleware := middleware.NewAuthMiddleware(store, db)
 
