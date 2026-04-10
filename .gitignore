@@ -37,3 +37,6 @@ Thumbs.db
 
 #CURL cookie
 cookie*.txt
+
+# Build folder
+build/
